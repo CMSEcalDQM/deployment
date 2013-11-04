@@ -1,4 +1,4 @@
-// $Id: EcalRenderPlugin.cc,v 1.2 2012/10/04 13:59:37 yiiyama Exp $
+// $Id: EcalRenderPlugin.cc,v 1.3 2012/11/16 10:01:00 yiiyama Exp $
 
 /*
   \file EcalRenderPlugin
@@ -6,8 +6,8 @@
   \author Y. Iiyama
   \author G. Della Ricca
   \author B. Gobbo
-  \version $Revision: 1.2 $
-  \date $Date: 2012/10/04 13:59:37 $
+  \version $Revision: 1.3 $
+  \date $Date: 2012/11/16 10:01:00 $
 */
 
 #include "DQM/DQMRenderPlugin.h"
@@ -34,7 +34,7 @@
 
 #include <vector>
 
-class EcalRenderPlugin : public DQMRenderPlugin
+class EcalRenderPlugin : public DQMRenderPlugin 
 {
 private :
   TH2C* ebTTLabels;
@@ -43,7 +43,8 @@ private :
 
   TH2C* eemTTLabels;
   TH2C* eepTTLabels;
-  TH2C* eeSCLabels;
+  TH2C* eemSCLabels;
+  TH2C* eepSCLabels;
   TH2C* eemSMLabels;
   TH2C* eepSMLabels;
   TH2C* eeSMLabels;
@@ -126,6 +127,8 @@ private :
 
 };
 
+
+
 inline
 EcalRenderPlugin::EcalRenderPlugin() :
   DQMRenderPlugin(),
@@ -134,7 +137,8 @@ EcalRenderPlugin::EcalRenderPlugin() :
   ebSMShiftedLabels(0),
   eemTTLabels(0),
   eepTTLabels(0),
-  eeSCLabels(0),
+  eemSCLabels(0),
+  eepSCLabels(0),
   eemSMLabels(0),
   eepSMLabels(0),
   eeSMLabels(0),
@@ -168,6 +172,8 @@ EcalRenderPlugin::EcalRenderPlugin() :
     ebpSMPhiAxis[i] = 0;
 }
 
+
+
 inline
 EcalRenderPlugin::~EcalRenderPlugin()
 {
@@ -176,7 +182,8 @@ EcalRenderPlugin::~EcalRenderPlugin()
   delete ebSMShiftedLabels;
   delete eemTTLabels;
   delete eepTTLabels;
-  delete eeSCLabels;
+  delete eemSCLabels;
+  delete eepSCLabels;
   delete eemSMLabels;
   delete eepSMLabels;
   delete eeSMLabels;
@@ -210,6 +217,8 @@ EcalRenderPlugin::~EcalRenderPlugin()
   while((color = gROOT->GetColor(iCol++)))
     delete color;
 }
+
+
 
 inline
 void
@@ -311,6 +320,7 @@ EcalRenderPlugin::initialise(int, char **)
     new TColor(iCol + i, r, g, b);
     pedestalPalette[i] = iCol + i;
   }
+    
 
   //
   // INITIALISE LABELS
@@ -322,7 +332,8 @@ EcalRenderPlugin::initialise(int, char **)
 
   eemTTLabels = new TH2C("eemTTLabels", "eemTTLabels", 100, 0., 100., 100, 0., 100.);
   eepTTLabels = new TH2C("eepTTLabels", "eepTTLabels", 100, 0., 100., 100, 0., 100.);
-  eeSCLabels = new TH2C("eeSCLabels", "eeSCLabels", 22, -5., 105., 22, -5., 105.);
+  eemSCLabels = new TH2C("eemSCLabels", "eemSCLabels", 22, -5., 105., 22, -5., 105.);
+  eepSCLabels = new TH2C("eepSCLabels", "eepSCLabels", 22, -5., 105., 22, -5., 105.);
   eemSMLabels = new TH2C("eemSMLabels", "eemSMLabels", 10, 0., 100., 10, 0., 100.);
   eepSMLabels = new TH2C("eepSMLabels", "eepSMLabels", 10, 0., 100., 10, 0., 100.);
   eeSMLabels = new TH2C("eeSMLabels", "eeSMLabels", 20, 0., 200., 10, 0., 100.);
@@ -338,7 +349,8 @@ EcalRenderPlugin::initialise(int, char **)
 
   eemTTLabels->SetDirectory(gROOT);
   eepTTLabels->SetDirectory(gROOT);
-  eeSCLabels->SetDirectory(gROOT);
+  eemSCLabels->SetDirectory(gROOT);
+  eepSCLabels->SetDirectory(gROOT);
   eemSMLabels->SetDirectory(gROOT);
   eepSMLabels->SetDirectory(gROOT);
   eeSMLabels->SetDirectory(gROOT);
@@ -354,7 +366,8 @@ EcalRenderPlugin::initialise(int, char **)
 
   eemTTLabels->SetMinimum(0.1);
   eepTTLabels->SetMinimum(0.1);
-  eeSCLabels->SetMinimum(0.1);
+  eemSCLabels->SetMinimum(0.1);
+  eepSCLabels->SetMinimum(0.1);
   eemSMLabels->SetMinimum(-9.1);
   eepSMLabels->SetMinimum(0.1);
   eeSMLabels->SetMinimum(-9.1);
@@ -380,7 +393,7 @@ EcalRenderPlugin::initialise(int, char **)
   }
 
   int iEBSMShifted[] = {
-    9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1,  2,  3,  4,  5,  6,  7,  8,
+    9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1,  2,  3,  4,  5,  6,  7,  8,  
     -9,-10,-11,-12,-13,-14,-15,-16,-17,-18, -1, -2, -3, -4, -5, -6, -7, -8
   };
 
@@ -401,7 +414,32 @@ EcalRenderPlugin::initialise(int, char **)
   }
 
   // 484 entries
-  int iCCUToIP[] = {
+  int iCCUFromIPEEm[] = {
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0, 30,  5,  1,  1,  5, 30,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0, 30, 19, 18, 17,  6,  2,  2,  6, 17, 18, 19, 30,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  3, 23, 22, 21, 20,  7,  3,  3,  7, 20, 21, 22, 23,  3,  0,  0,  0,  0,
+    0,  0,  0,  3,  2,  1, 26, 25, 24,  8,  4,  4,  8, 24, 25, 26,  1,  2,  3,  0,  0,  0,
+    0,  0, 25,  6,  5,  4, 29, 28, 27, 13,  9,  9, 13, 27, 28, 29,  4,  5,  6, 25,  0,  0,
+    0,  0, 11, 10,  9,  8,  7, 32, 31, 14, 10, 10, 14, 31, 32,  7,  8,  9, 10, 11,  0,  0,
+    0,  0, 17, 16, 15, 14, 13, 12, 33, 15, 11, 11, 15, 33, 12, 13, 14, 15, 16, 17,  0,  0,
+    0, 25, 24, 23, 22, 21, 20, 19, 18, 16, 12, 12, 16, 18, 19, 20, 21, 22, 23, 24, 25,  0,
+    0,  2,  1, 31, 30, 29, 28, 27, 26, 25,  3, 25,  3, 26, 27, 28, 29, 30, 31,  1,  2,  0,
+    0,  9,  8,  7,  6,  5,  4,  3, 32,  0,  0,  0,  0, 32,  3,  4,  5,  6,  7,  8,  9,  0,
+    0, 17, 16, 15, 14, 13, 12, 11, 10,  0,  0,  0,  0, 10, 11, 12, 13, 14, 15, 16, 17,  0,
+    0, 24, 23, 22, 21, 20, 19, 18,  1, 21, 14, 21, 14,  1, 18, 19, 20, 21, 22, 23, 24,  0,
+    0, 34, 29, 28, 27, 26, 25,  3,  2, 32,  6, 30, 32,  2,  3, 25, 26, 27, 28, 29, 34,  0,
+    0,  0, 30, 32, 31,  7,  6,  5,  4, 33,  7, 31, 33,  4,  5,  6,  7, 31, 32, 30,  0,  0,
+    0,  0, 33, 13, 12, 11, 10,  9,  8,  4,  8, 32, 28,  8,  9, 10, 11, 12, 13, 33,  0,  0,
+    0,  0, 14, 20, 19, 18, 17, 16, 15,  5,  9, 33, 29, 15, 16, 17, 18, 19, 20, 14,  0,  0,
+    0,  0,  0, 14, 26, 25, 24, 23, 22, 10, 14, 38, 34, 22, 23, 24, 25, 26, 14,  0,  0,  0,
+    0,  0,  0,  0, 21, 27, 30, 28,  1, 11, 15, 39, 35, 25, 28, 30, 27, 21,  0,  0,  0,  0,
+    0,  0,  0,  0,  0, 21, 31, 29,  2, 12, 16, 40, 36, 26, 29, 31, 21,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  3, 13, 17, 41, 37, 27,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+  };
+
+  int iCCUToIPEEp[] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0, 30,  5,  1,  1,  5, 30,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0, 30, 19, 18, 17,  6,  2,  2,  6, 17, 18, 19, 30,  0,  0,  0,  0,  0,
@@ -426,10 +464,14 @@ EcalRenderPlugin::initialise(int, char **)
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
   };
 
+  // CCU numbering is identical between EE+ and EE- when both are seen from the IP
+  // DQM consistently uses "From Jura (from positive)" point of view -> +-05 has flipped configuration
+
   for(unsigned i = 0; i < 484; i++){
     int ix(i % 22 + 1);
     int iy(22 - i / 22);
-    eeSCLabels->SetBinContent(ix, iy, iCCUToIP[i]);
+    eemSCLabels->SetBinContent(ix, iy, iCCUFromIPEEm[i]);
+    eepSCLabels->SetBinContent(ix, iy, iCCUToIPEEp[i]);
   }
 
   // 100 entries
@@ -487,7 +529,8 @@ EcalRenderPlugin::initialise(int, char **)
 
   eemTTLabels->SetMarkerSize(0.9);
   eepTTLabels->SetMarkerSize(0.9);
-  eeSCLabels->SetMarkerSize(2);
+  eemSCLabels->SetMarkerSize(2);
+  eepSCLabels->SetMarkerSize(2);
   eemSMLabels->SetMarkerSize(2);
   eepSMLabels->SetMarkerSize(2);
   eeSMLabels->SetMarkerSize(2);
@@ -496,6 +539,7 @@ EcalRenderPlugin::initialise(int, char **)
   ecalSMLabels->SetMarkerSize(3);
 
   MEMLabels->SetMarkerSize(2);
+
 
   //
   // INITIALISE EE SECTOR LINES
@@ -578,7 +622,7 @@ EcalRenderPlugin::initialise(int, char **)
   int ti6[] = {0, 2, 4, 6, 7, 9, 10, 13, 14, 17, 19, 20, 23, 24, 27, 28, 31, 32, 35, 36, 39, 41, 43, 44, 47, 48, 49, 50, 55, 56, 59, 60, 61, 65, 66, 67, 71, 72, 73, 77, 78, 81, 82, 85, 86, 87, 91, 92, 93, 97, 98, 101, 102, 103, 106, 108, 109, 113, 114, 118, 119, 120, 121, 124, 125, 128, 129, 130, 134, 135, 136, 140, 141, 142, 146, 147, 148, 152, 153, 154, 155, 160, 161, 162, 163, 168, 169, 172, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527};
   int ti7[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 17, 18, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 56, 57, 61, 62, 67, 68, 73, 74, 78, 79, 87, 88, 92, 93, 94, 95, 98, 99, 102, 103, 104, 106, 107, 109, 110, 111, 114, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 136, 137, 142, 143, 146, 147, 148, 149, 150, 151, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629, 630, 631, 632, 633, 634, 635, 636, 637, 638, 639};
   int ti8[] = {1, 3, 5, 7, 8, 11, 12, 15, 16, 18, 21, 22, 25, 26, 29, 30, 33, 34, 37, 38, 40, 42, 45, 46, 51, 52, 53, 54, 57, 58, 62, 63, 64, 68, 69, 70, 74, 75, 76, 79, 80, 83, 84, 88, 89, 90, 94, 95, 96, 99, 100, 104, 105, 107, 110, 111, 112, 115, 116, 117, 118, 122, 123, 126, 127, 131, 132, 133, 137, 138, 139, 143, 144, 145, 149, 150, 151, 156, 157, 158, 159, 164, 165, 166, 167, 170, 171, 173, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629, 630, 631, 632, 633, 634, 635, 636, 637, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, 650, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661, 662, 663, 664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700, 701, 702, 703, 704, 705, 706};
-
+ 
   indices[0].assign(ti0, ti0 + sizeof(ti0)/sizeof(int));
   indices[1].assign(ti1, ti1 + sizeof(ti1)/sizeof(int));
   indices[2].assign(ti2, ti2 + sizeof(ti2)/sizeof(int));
@@ -619,6 +663,7 @@ EcalRenderPlugin::initialise(int, char **)
       eeTTArray[i]->Add(eeTTSectors[indices[i][iInd]]);
   }
 
+
   ecalSubdetPartitions[0] = new TLine(0., 5., 9., 5.);
   ecalSubdetPartitions[1] = new TLine(0., 3., 9., 3.);
   ecalSubdetPartitions[2] = new TLine(0., 1., 9., 1.);
@@ -628,12 +673,15 @@ EcalRenderPlugin::initialise(int, char **)
   }
 }
 
+
+
 inline
 bool
 EcalRenderPlugin::applies(const VisDQMObject &dqmObject, const VisDQMImgInfo &)
 {
   return dqmObject.name.substr(0, 4) == "Ecal" && dqmObject.name.substr(4, 9) != "Preshower" && dqmObject.name.substr(4, 11) != "Calibration";
 }
+
 
 inline
 void
@@ -923,7 +971,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  if(btype == kTriggerTower)
 	    labels = iSM < 0 ? eemTTLabels : eepTTLabels;
 	  else
-	    labels = eeSCLabels;
+	    labels = iSM < 0 ? eemSCLabels : eepSCLabels;
 
 	  labels->GetXaxis()->SetRangeUser(obj->GetXaxis()->GetXmin(), obj->GetXaxis()->GetXmax() - 0.5);
 	  labels->GetYaxis()->SetRangeUser(obj->GetYaxis()->GetXmin(), obj->GetYaxis()->GetXmax() - 0.5);
@@ -974,7 +1022,9 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
   }
 }
 
-inline
+
+
+inline 
 void
 EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, VisDQMImgInfo const&, VisDQMRenderInfo& renderInfo, bool& applyDefaults)
 {
@@ -1117,6 +1167,7 @@ EcalRenderPlugin::postDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject,
   else if(TPRegexp("E[BE]ClusterTask/E[BE]CLT SC energy vs seed crystal energy").MatchB(fullpath))
     applyDefaults = false;
 }
+
 
 inline
 std::pair<unsigned, unsigned>
@@ -1317,6 +1368,8 @@ EcalRenderPlugin::getPlotType(TH1 const* obj, TString const& fullpath) const
   return std::make_pair(otype, btype);
 }
 
+
+
 inline
 void
 EcalRenderPlugin::drawEESectors(char c, int iSM, TH1 const* obj, float factor/* = 1.*/, float offset/* = 0.*/) const
@@ -1430,6 +1483,7 @@ EcalRenderPlugin::drawEESectors(char c, int iSM, TH1 const* obj, float factor/* 
   }
   delete itr;
 }
+
 
 inline
 void
