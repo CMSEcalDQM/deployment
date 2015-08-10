@@ -174,7 +174,6 @@ server.workspace('DQMContent', 40, 'Trigger/Lumi', 'L1TEMU', '^L1TEMU/', '',
                  'L1TEMU/HCAL/HTPErrorFlag')
 
 server.workspace('DQMContent', 40, 'Trigger/Lumi', 'HLT', '^HLT/', '',
-<<<<<<< HEAD
                  'HLT/TriggerRates/L1 Algo/L1_SingleMuOpen (bit 55)',
                  'HLT/TriggerRates/L1 Algo/L1_SingleEG5 (bit 47)',
                  'HLT/TriggerRates/Streams/A',
@@ -189,38 +188,6 @@ server.workspace('DQMContent', 40, 'Trigger/Lumi', 'HLT', '^HLT/', '',
                  'HLT/TriggerRates/calibration',
                  'HLT/TriggerRates/random',
                  'HLT/TriggerRates/processed'
-=======
-                 'HLT/ObjectMonitor/MainShifter/Photon_pT',
-                 'HLT/ObjectMonitor/MainShifter/Muon_pT',
-                 'HLT/ObjectMonitor/MainShifter/Electron_pT',
-                 'HLT/ObjectMonitor/MainShifter/Jet_pT',
-                 ##'HLT/ObjectMonitor/MainShifter/JetAK8_pT',
-                 ##'HLT/ObjectMonitor/MainShifter/JetAK8_mass',
-                 'HLT/ObjectMonitor/MainShifter/Tau_pT',
-                 'HLT/ObjectMonitor/MainShifter/Dimuon_LowMass',
-                 'HLT/ObjectMonitor/MainShifter/diMuon_Mass',
-                 'HLT/ObjectMonitor/MainShifter/diElec_Mass',
-                 'HLT/ObjectMonitor/MainShifter/alphaT',
-                 'HLT/ObjectMonitor/MainShifter/CaloMET_pT',
-                 'HLT/ObjectMonitor/MainShifter/CaloHT_pT',
-                 ##'HLT/ObjectMonitor/MainShifter/PFHT_pT',
-                 'HLT/ObjectMonitor/MainShifter/PFMET_pT',
-                 'HLT/ObjectMonitor/MainShifter/L2Muon_pT',
-                 'HLT/ObjectMonitor/MainShifter/L2NoBPTXMuon_pT',
-                 'HLT/ObjectMonitor/MainShifter/rsq',
-                 'HLT/ObjectMonitor/MainShifter/mr',
-                 'HLT/ObjectMonitor/MainShifter/Muon_dxy',
-                 'HLT/ObjectMonitor/MainShifter/bJetCSVCalo',
-                 'HLT/ObjectMonitor/MainShifter/bJetCSVPF',
-                 'HLT/Tracking/iter2Merged/GeneralProperties/TrackPt_ImpactPoint_GenTk',
-                 'HLT/Tracking/pixelTracks/GeneralProperties/TrackPt_ImpactPoint_GenTk',
-                 'HLT/Tracking/iter2Merged/GeneralProperties/NumberOfTracksVsLS_GenTk',
-                 'HLT/Tracking/pixelTracks/GeneralProperties/NumberOfTracksVsLS_GenTk',
-                 'HLT/Tracking/iter2Merged/GeneralProperties/NumberOfRecHitsPerTrackVsLS_GenTk',
-                 'HLT/Tracking/pixelTracks/GeneralProperties/NumberOfRecHitsPerTrackVsLS_GenTk',
-                 'HLT/SiStrip/MechanicalView/TIB/TotalNumberOfClusterProfile__TIB',
-                 'HLT/Layouts/highestRate Summary'
->>>>>>> dmwm/master
                 )
 
 server.workspace('DQMContent', 51,'FeedBack for Collisions', 'Tracking FeedBack', '^(Collisions|SiStrip|Tracking|Pixel)/', 'Collisions/TrackingFeedBack',
