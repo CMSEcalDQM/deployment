@@ -1,7 +1,7 @@
 import os.path, socket; global CONFIGDIR
 from glob import glob
 CONFIGDIR = os.path.normcase(os.path.abspath(__file__)).rsplit('/', 1)[0]
-BASEDIR   = CONFIGDIR.replace("/current/config/dqmgui", "")
+BASEDIR   = __file__.rsplit('/', 4)[0]
 STATEDIR  = "%s/state/dqmgui/offline" % BASEDIR
 LOGDIR    = "%s/logs/dqmgui/offline" % BASEDIR
 
@@ -20,7 +20,17 @@ server.serverDir   = STATEDIR
 server.logFile     = '%s/weblog-%%Y%%m%%d.log' % LOGDIR
 server.baseUrl     = '/dqm/offline'
 server.title       = 'CMS data quality'
-server.serviceName = 'Offline'
+# For convenience, we change the service name, depending on the server:
+hostname = socket.gethostname().lower().split('.')[0]
+# Offline production server
+if hostname == 'vocms0138':
+  server.serviceName = 'Offline'
+# Relval test server
+elif hostname == 'vocms0131':
+  server.serviceName = 'Offline Test'
+# Any local instance of the relval flavor
+else:
+  server.serviceName = 'Offline Local'
 
 server.plugin('render', "%s/style/*.cc" % CONFIGDIR)
 server.extend('DQMRenderLink', server.pathOfPlugin('render'))
@@ -31,13 +41,13 @@ server.extend('DQMFileAccess', "%s/auth/wmcore-auth/header-auth-key" % __file__.
                 "ZIP": "%s/zipped" % STATEDIR })
 server.extend('DQMLayoutAccess', None, STATEDIR,
               ['/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=rovere/CN=653292/CN=Marco Rovere',
-               '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=erosales/CN=725205/CN=Edgar Eduardo Rosales Rosero',
-               '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=batinkov/CN=739757/CN=Atanas Ivanov Batinkov' ])
+               '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=batinkov/CN=739757/CN=Atanas Ivanov Batinkov',
+               '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=bvanbesi/CN=759373/CN=Broen van Besien',])
 server.source('DQMUnknown')
 server.source('DQMOverlay')
 server.source('DQMStripChart')
 server.source('DQMCertification')
-server.source('DQMArchive', "%s/ix" % STATEDIR, '^/Global/')
+server.source('DQMArchive', "%s/ix128" % STATEDIR, '^/Global/')
 server.source('DQMLayout')
 
 execfile(CONFIGDIR + "/dqm-services.py")

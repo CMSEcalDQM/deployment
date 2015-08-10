@@ -46,6 +46,16 @@ config.mongodb.dburi = ['mongodb://localhost:8230']
 config.mongodb.lifetime = 300
 config.mongodb.dbname = 'das'
 
+# pycurl configuration
+config.component_('pycurl')
+config.pycurl.FOLLOWLOCATION=1
+config.pycurl.CONNECTTIMEOUT=270
+config.pycurl.MAXREDIRS=5
+config.pycurl.NOSIGNAL=1
+config.pycurl.TIMEOUT=270
+config.pycurl.SSL_VERIFYPEER=False
+config.pycurl.VERBOSE=0
+
 # dasdb configuration
 config.component_('dasdb')
 config.dasdb.dbname = 'das'
@@ -82,7 +92,7 @@ config.das.core_workers = 50
 config.das.api_workers = 2
 config.das.error_expire = 300
 config.das.emptyset_expire = 5
-config.das.thread_weights = ['phedex:5', 'dbs3:5']
+#config.das.thread_weights = ['phedex:5', 'dbs3:5']
 config.das.parserdir = '%s/state/das' % __file__.rsplit('/', 4)[0] # area owned by _das account
 config.das.services = ['dbs3','phedex','dashboard','monitor','runregistry','sitedb2','combined','conddb','reqmgr','mcm']
 config.das.main_dbs = 'dbs3'
