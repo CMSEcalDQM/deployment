@@ -1197,7 +1197,7 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
   if( TPRegexp("E[BE]TestPulseTask/Gain(12|6|1)/E[BE]TPT amplitude E[BE][+-][0-1][0-9] (G12|G6|G1)").MatchB(fullpath) ){
     if( fullpath.Contains("EBTPT") )
       obj->GetZaxis()->SetRangeUser( 1000.,3900. );
-    else if( fullpath.Contains("EETPT") ) 
+    else if( fullpath.Contains("EETPT") )
       obj->GetZaxis()->SetRangeUser( 1500.,4400. );
   }
 
