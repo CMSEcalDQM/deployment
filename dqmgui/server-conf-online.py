@@ -98,12 +98,13 @@ server.serviceName = SERVICENAME
 server.plugin('render', "%s/style/*.cc" % CONFIGDIR)
 server.extend('DQMRenderLink', server.pathOfPlugin('render'))
 server.extend('DQMToJSON')
-server.extend('DQMFileAccess', None, UPLOADDIR,FILEREPO)
+server.extend('DQMFileAccess', "%s/auth/wmcore-auth/header-auth-key" % __file__.rsplit('/', 3)[0],
+              UPLOADDIR,FILEREPO)
 server.source('DQMUnknown')
 server.source('DQMOverlay')
 server.source('DQMStripChart')
 server.source('DQMLive', "%s:%s" % (COLLHOST,COLLPORT))
-server.source('DQMArchive', "%s/ix" % STATEDIR, '^/Global/')
+server.source('DQMArchive', "%s/ix128" % STATEDIR, '^/Global/')
 server.source('DQMLayout')
 
 execfile(CONFIGDIR + "/dqm-services.py")
