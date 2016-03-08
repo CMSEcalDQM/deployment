@@ -120,6 +120,7 @@ private :
   enum BinningType{
     kCrystal,
     kTriggerTower,
+    kPseudoStrip,
     kSuperCrystal,
     kTCC,
     kDCC,
@@ -854,7 +855,7 @@ EcalRenderPlugin::preDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const 
       else{
 	obj->GetXaxis()->SetNdivisions(obj->GetNbinsX() / 5);
 	obj->GetYaxis()->SetNdivisions(obj->GetNbinsY() / 5);
-        if(btype == kTriggerTower) gPad->SetGrid(false, false);
+        if(btype == kTriggerTower || btype == kPseudoStrip) gPad->SetGrid(false, false);
       }
       break;
     case kSMMEM:
@@ -1025,7 +1026,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  int iSM(TString(matches->At(1)->GetName()).Atoi());
 
 	  TH2C* labels(0);
-	  if(btype == kTriggerTower)
+	  if(btype == kTriggerTower || btype == kPseudoStrip)
 	    labels = eeTTLabels;
 	  else
 	    labels = iSM < 0 ? eemSCLabels : eepSCLabels;
@@ -1034,7 +1035,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  labels->GetYaxis()->SetRangeUser(obj->GetYaxis()->GetXmin(), obj->GetYaxis()->GetXmax() - 0.5);
 	  labels->Draw("text same");
 
-          if(btype == kTriggerTower) { 
+          if(btype == kTriggerTower || btype == kPseudoStrip) { 
              eemTCCLabels->GetXaxis()->SetRangeUser(obj->GetXaxis()->GetXmin(), obj->GetXaxis()->GetXmax() - 1);
              eemTCCLabels->GetYaxis()->SetRangeUser(obj->GetYaxis()->GetXmin(), obj->GetYaxis()->GetXmax() - 1); 
              eepTCCLabels->GetXaxis()->SetRangeUser(obj->GetXaxis()->GetXmin(), obj->GetXaxis()->GetXmax() - 1);
@@ -1050,7 +1051,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  if(iSM < 0 && !isNewStyle) iSM += 10;
 
 	  drawEESectors('D', iSM, obj);
-	  if(btype == kTriggerTower){
+	  if(btype == kTriggerTower || btype == kPseudoStrip){
 	    drawEESectors('T', iSM, obj);
 	    drawEESectors('t', iSM, obj);
 	  }
@@ -1074,7 +1075,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
         rctPhiAxis->Draw("same");
         for(int i(0); i < 36; ++i)
           ecalRCTSectors[i]->Draw();
-}
+      }
       else{
         gStyle->SetPaintTextFormat("+03g");
         ecalSMLabels->Draw("text same");
@@ -1116,7 +1117,9 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
      !fullpath.Contains("Trigger Primitives") &&
      !fullpath.Contains("Occupancy") &&
      !fullpath.Contains("TestPulse") &&
-     !fullpath.Contains("Cluster")) return;
+     !fullpath.Contains("Cluster") &&
+     !fullpath.Contains("channel status") &&
+     !fullpath.Contains("energy Side")) return;
 
   TH1* obj(static_cast<TH1*>(dqmObject.object));
 
@@ -1174,6 +1177,14 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
 
     applyDefaults = false;
   }
+  else if( TPRegexp("E[BE]TimingTask/E[BE]TMT in-time vs BX[+-]1 amplitude(| EE [+-])").MatchB(fullpath) ){
+    if(obj->GetMaximum() > 0.) gPad->SetLogz(true);
+    obj->GetXaxis()->SetNoExponent(kTRUE);
+    gStyle->SetPalette(1);
+    gPad->SetGrid(false, false);
+
+    applyDefaults = false;
+  }
   else if(TPRegexp("E[BE]TimingTask/E[BE]TMT timing E[BE][+] vs E[BE][-]").MatchB(fullpath)){
     if(obj->GetMaximum() > 0.) gPad->SetLogz(true);
     gPad->SetGrid(false, false);
@@ -1187,6 +1198,19 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     gPad->SetGrid(false, false);
 
     applyDefaults = false;
+  }
+  else if(TPRegexp("Preshower EE vs ES energy Side[+-]").MatchB(fullpath)){
+    obj->GetXaxis()->SetNoExponent(kTRUE);
+    gStyle->SetPalette(1);
+    gPad->SetGrid(false, false);
+    
+    applyDefaults = false;
+  }
+
+  if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
+    obj->SetContour(14);
+    gStyle->SetPalette(1);
   }
 
   if( TPRegexp("E[BE]OccupancyTask/E[BE]OT (|TP )(digi |rec hit )(|thr )occupancy (|EE [+-] )projection (eta|phi)").MatchB(fullpath) ||
@@ -1243,7 +1267,8 @@ EcalRenderPlugin::postDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject,
       timingAxis->Draw();
   }
   else if(TPRegexp("E[BE]TimingTask/E[BE]TMT timing vs amplitude (summary(| EE [+-])|E[BE][+-][0-1][0-9])").MatchB(fullpath) ||
-          TPRegexp("E[BE]TimingTask/E[BE]TMT timing E[BE][+] vs E[BE][-]").MatchB(fullpath))
+          TPRegexp("E[BE]TimingTask/E[BE]TMT timing E[BE][+] vs E[BE][-]").MatchB(fullpath) ||
+          TPRegexp("E[BE]TimingTask/E[BE]TMT in-time vs BX[+-]1 amplitude(| EE [+-])").MatchB(fullpath) )
     applyDefaults = false;
   else if(!isNewStyle && TPRegexp("EBClusterTask/EBCLT BC (ET|energy|number|size) map").MatchB(fullpath)){
     gStyle->SetPaintTextFormat("+03g");
@@ -1455,7 +1480,9 @@ EcalRenderPlugin::getPlotType(TH1 const* obj, TString const& fullpath) const
     }
   }
 
-  if(fullpath.Contains("TT ") && ((isEB && btype == kSuperCrystal) || (isEE && btype == kCrystal)))
+  if(fullpath.Contains("Masking "))
+    btype = kPseudoStrip;
+  else if(fullpath.Contains("TT ") && ((isEB && btype == kSuperCrystal) || (isEE && btype == kCrystal)))
     btype = kTriggerTower;
   else if(fullpath.Contains(" eta"))
     btype = kProjEta;
