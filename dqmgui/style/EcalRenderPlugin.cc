@@ -69,6 +69,7 @@ private :
   std::vector<int> qualityPalette;
   std::vector<int> tpTimingPalette;
   std::vector<int> accumPalette;
+  std::vector<int> accumMaskedPalette;
   std::vector<int> timingPalette;
   std::vector<int> pedestalPalette;
 
@@ -154,6 +155,7 @@ EcalRenderPlugin::EcalRenderPlugin() :
   qualityPalette(),
   tpTimingPalette(),
   accumPalette(),
+  accumMaskedPalette(),
   timingPalette(),
   pedestalPalette(),
   timingAxis(0),
@@ -244,6 +246,7 @@ EcalRenderPlugin::initialise(int, char **)
   int const nPedestalSide(10);
   int const nPedestalCenter(10);
   int const nAccum(50);
+  int const nAccumMasked(14);
 
   tpTimingPalette.resize(nTPTim);
   tpTimingPalette[0] = kGray+2;
@@ -303,6 +306,15 @@ EcalRenderPlugin::initialise(int, char **)
     new TColor(iCol + i, r, g, b);
     accumPalette[i] = iCol + i;
   }
+
+  // For TTF4 vs Masking Status
+  accumMaskedPalette.resize(nAccumMasked);
+  for(int i(0); i < 11; i++){
+    accumMaskedPalette[i] = kWhite;
+  }
+  accumMaskedPalette[11] = kGray;
+  accumMaskedPalette[12] = kGray+3;
+  accumMaskedPalette[13] = kBlue;
 
   iCol += nAccum;
 
@@ -1116,6 +1128,8 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
      !fullpath.Contains("Trigger Primitives") &&
      !fullpath.Contains("Occupancy") &&
      !fullpath.Contains("TestPulse") &&
+     !fullpath.Contains("Status Flags") &&
+     !fullpath.Contains("Masking Status") &&
      !fullpath.Contains("Cluster")) return;
 
   TH1* obj(static_cast<TH1*>(dqmObject.object));
@@ -1174,6 +1188,14 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
 
     applyDefaults = false;
   }
+  else if( TPRegexp("E[BE]TimingTask/E[BE]TMT in-time vs BX[+-]1 amplitude(| EE [+-])").MatchB(fullpath) ){
+    if(obj->GetMaximum() > 0.) gPad->SetLogz(true);
+    obj->GetXaxis()->SetNoExponent(kTRUE);
+    gStyle->SetPalette(1);
+    gPad->SetGrid(false, false);
+
+    applyDefaults = false;
+  }
   else if(TPRegexp("E[BE]TimingTask/E[BE]TMT timing E[BE][+] vs E[BE][-]").MatchB(fullpath)){
     if(obj->GetMaximum() > 0.) gPad->SetLogz(true);
     gPad->SetGrid(false, false);
@@ -1181,12 +1203,26 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     applyDefaults = false;
   }
   else if(TPRegexp("E[BE]TimingClient/E[BE]TMT timing projection (eta|phi)(| EE [+-])").MatchB(fullpath))
-    obj->GetYaxis()->SetRangeUser(-5., 5.);
+    obj->GetYaxis()->SetRangeUser(-25., 25.);
   else if(TPRegexp("E[BE]ClusterTask/E[BE]CLT SC energy vs seed crystal energy").MatchB(fullpath)){
     if(obj->GetMaximum() > 0.) gPad->SetLogz(true);
     gPad->SetGrid(false, false);
 
     applyDefaults = false;
+  }
+  if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Status Flags(| EE [+-])").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,5. );
+    obj->SetContour(5);
+    gStyle->SetPalette(1);
+  }
+  if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Masking Status(| EE [+-])").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,1. );
+    gStyle->SetPalette(1);
+  }
+  if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TTF4 vs Masking Status(| EE [+-])").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
+    //renderInfo.drawOptions = "COLZ";
+    gStyle->SetPalette(accumMaskedPalette.size(), &(accumMaskedPalette[0]));
   }
 
   if( TPRegexp("E[BE]OccupancyTask/E[BE]OT (|TP )(digi |rec hit )(|thr )occupancy (|EE [+-] )projection (eta|phi)").MatchB(fullpath) ||
@@ -1243,7 +1279,8 @@ EcalRenderPlugin::postDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject,
       timingAxis->Draw();
   }
   else if(TPRegexp("E[BE]TimingTask/E[BE]TMT timing vs amplitude (summary(| EE [+-])|E[BE][+-][0-1][0-9])").MatchB(fullpath) ||
-          TPRegexp("E[BE]TimingTask/E[BE]TMT timing E[BE][+] vs E[BE][-]").MatchB(fullpath))
+          TPRegexp("E[BE]TimingTask/E[BE]TMT timing E[BE][+] vs E[BE][-]").MatchB(fullpath) ||
+          TPRegexp("E[BE]TimingTask/E[BE]TMT in-time vs BX[+-]1 amplitude(| EE [+-])").MatchB(fullpath) )
     applyDefaults = false;
   else if(!isNewStyle && TPRegexp("EBClusterTask/EBCLT BC (ET|energy|number|size) map").MatchB(fullpath)){
     gStyle->SetPaintTextFormat("+03g");
