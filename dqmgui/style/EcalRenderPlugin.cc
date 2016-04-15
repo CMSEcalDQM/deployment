@@ -1213,7 +1213,14 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
 
     applyDefaults = false;
   }
-<<<<<<< HEAD
+  else if(TPRegexp("Preshower EE vs ES energy Side[+-]").MatchB(fullpath)){
+    obj->GetXaxis()->SetNoExponent(kTRUE);
+    gStyle->SetPalette(1);
+    gPad->SetGrid(false, false);
+    
+    applyDefaults = false;
+  }
+
   if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Status Flags(| EE [+-])").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,5. );
     obj->SetContour(5);
@@ -1227,20 +1234,10 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
     //renderInfo.drawOptions = "COLZ";
     gStyle->SetPalette(accumMaskedPalette.size(), &(accumMaskedPalette[0]));
-=======
-  else if(TPRegexp("Preshower EE vs ES energy Side[+-]").MatchB(fullpath)){
-    obj->GetXaxis()->SetNoExponent(kTRUE);
-    gStyle->SetPalette(1);
-    gPad->SetGrid(false, false);
-    
-    applyDefaults = false;
-  }
-
   if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
     obj->SetContour(14);
     gStyle->SetPalette(1);
->>>>>>> d6759251dbbaeadaea35dadae9e83ac5a03d7198
   }
 
   if( TPRegexp("E[BE]OccupancyTask/E[BE]OT (|TP )(digi |rec hit )(|thr )occupancy (|EE [+-] )projection (eta|phi)").MatchB(fullpath) ||
