@@ -121,6 +121,7 @@ private :
   enum BinningType{
     kCrystal,
     kTriggerTower,
+    kPseudoStrip,
     kSuperCrystal,
     kTCC,
     kDCC,
@@ -866,7 +867,7 @@ EcalRenderPlugin::preDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const 
       else{
 	obj->GetXaxis()->SetNdivisions(obj->GetNbinsX() / 5);
 	obj->GetYaxis()->SetNdivisions(obj->GetNbinsY() / 5);
-        if(btype == kTriggerTower) gPad->SetGrid(false, false);
+        if(btype == kTriggerTower || btype == kPseudoStrip) gPad->SetGrid(false, false);
       }
       break;
     case kSMMEM:
@@ -1037,7 +1038,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  int iSM(TString(matches->At(1)->GetName()).Atoi());
 
 	  TH2C* labels(0);
-	  if(btype == kTriggerTower)
+	  if(btype == kTriggerTower || btype == kPseudoStrip)
 	    labels = eeTTLabels;
 	  else
 	    labels = iSM < 0 ? eemSCLabels : eepSCLabels;
@@ -1046,7 +1047,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  labels->GetYaxis()->SetRangeUser(obj->GetYaxis()->GetXmin(), obj->GetYaxis()->GetXmax() - 0.5);
 	  labels->Draw("text same");
 
-          if(btype == kTriggerTower) { 
+          if(btype == kTriggerTower || btype == kPseudoStrip) { 
              eemTCCLabels->GetXaxis()->SetRangeUser(obj->GetXaxis()->GetXmin(), obj->GetXaxis()->GetXmax() - 1);
              eemTCCLabels->GetYaxis()->SetRangeUser(obj->GetYaxis()->GetXmin(), obj->GetYaxis()->GetXmax() - 1); 
              eepTCCLabels->GetXaxis()->SetRangeUser(obj->GetXaxis()->GetXmin(), obj->GetXaxis()->GetXmax() - 1);
@@ -1062,7 +1063,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
 	  if(iSM < 0 && !isNewStyle) iSM += 10;
 
 	  drawEESectors('D', iSM, obj);
-	  if(btype == kTriggerTower){
+	  if(btype == kTriggerTower || btype == kPseudoStrip){
 	    drawEESectors('T', iSM, obj);
 	    drawEESectors('t', iSM, obj);
 	  }
@@ -1086,7 +1087,7 @@ EcalRenderPlugin::postDraw(TCanvas* canvas, const VisDQMObject& dqmObject, const
         rctPhiAxis->Draw("same");
         for(int i(0); i < 36; ++i)
           ecalRCTSectors[i]->Draw();
-}
+      }
       else{
         gStyle->SetPaintTextFormat("+03g");
         ecalSMLabels->Draw("text same");
@@ -1130,7 +1131,9 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
      !fullpath.Contains("TestPulse") &&
      !fullpath.Contains("Status Flags") &&
      !fullpath.Contains("Masking Status") &&
-     !fullpath.Contains("Cluster")) return;
+     !fullpath.Contains("Cluster") &&
+     !fullpath.Contains("channel status") &&
+     !fullpath.Contains("energy Side")) return;
 
   TH1* obj(static_cast<TH1*>(dqmObject.object));
 
@@ -1210,6 +1213,7 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
 
     applyDefaults = false;
   }
+<<<<<<< HEAD
   if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Status Flags(| EE [+-])").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,5. );
     obj->SetContour(5);
@@ -1223,6 +1227,20 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
     //renderInfo.drawOptions = "COLZ";
     gStyle->SetPalette(accumMaskedPalette.size(), &(accumMaskedPalette[0]));
+=======
+  else if(TPRegexp("Preshower EE vs ES energy Side[+-]").MatchB(fullpath)){
+    obj->GetXaxis()->SetNoExponent(kTRUE);
+    gStyle->SetPalette(1);
+    gPad->SetGrid(false, false);
+    
+    applyDefaults = false;
+  }
+
+  if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
+    obj->SetContour(14);
+    gStyle->SetPalette(1);
+>>>>>>> d6759251dbbaeadaea35dadae9e83ac5a03d7198
   }
 
   if( TPRegexp("E[BE]OccupancyTask/E[BE]OT (|TP )(digi |rec hit )(|thr )occupancy (|EE [+-] )projection (eta|phi)").MatchB(fullpath) ||
@@ -1492,7 +1510,9 @@ EcalRenderPlugin::getPlotType(TH1 const* obj, TString const& fullpath) const
     }
   }
 
-  if(fullpath.Contains("TT ") && ((isEB && btype == kSuperCrystal) || (isEE && btype == kCrystal)))
+  if(fullpath.Contains("Masking "))
+    btype = kPseudoStrip;
+  else if(fullpath.Contains("TT ") && ((isEB && btype == kSuperCrystal) || (isEE && btype == kCrystal)))
     btype = kTriggerTower;
   else if(fullpath.Contains(" eta"))
     btype = kProjEta;
