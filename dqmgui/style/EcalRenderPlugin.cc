@@ -1234,6 +1234,7 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
     //renderInfo.drawOptions = "COLZ";
     gStyle->SetPalette(accumMaskedPalette.size(), &(accumMaskedPalette[0]));
+  }
   if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
     obj->SetContour(14);
