@@ -1221,6 +1221,11 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     applyDefaults = false;
   }
 
+  if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,15. );
+    obj->SetContour(15);
+    gStyle->SetPalette(1);
+  }
   if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Status Flags(| EE [+-])").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,5. );
     obj->SetContour(5);
@@ -1232,15 +1237,8 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
   }
   if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TTF4 vs Masking Status(| EE [+-])").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
-    //renderInfo.drawOptions = "COLZ";
     gStyle->SetPalette(accumMaskedPalette.size(), &(accumMaskedPalette[0]));
-  }
-  if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
-    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
-    obj->SetContour(14);
-    gStyle->SetPalette(1);
-  }
-
+  } 
   if( TPRegexp("E[BE]OccupancyTask/E[BE]OT (|TP )(digi |rec hit )(|thr )occupancy (|EE [+-] )projection (eta|phi)").MatchB(fullpath) ||
       TPRegexp("E[BE]ClusterTask/E[BE]CLT BC number projection (eta|phi)(| EE [+-])").MatchB(fullpath) ){
     if( obj->GetMaximum() > 0. ) obj->GetYaxis()->SetRangeUser( 0.,1.2*obj->GetMaximum() );
