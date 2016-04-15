@@ -69,6 +69,7 @@ private :
   std::vector<int> qualityPalette;
   std::vector<int> tpTimingPalette;
   std::vector<int> accumPalette;
+  std::vector<int> accumMaskedPalette;
   std::vector<int> timingPalette;
   std::vector<int> pedestalPalette;
 
@@ -155,6 +156,7 @@ EcalRenderPlugin::EcalRenderPlugin() :
   qualityPalette(),
   tpTimingPalette(),
   accumPalette(),
+  accumMaskedPalette(),
   timingPalette(),
   pedestalPalette(),
   timingAxis(0),
@@ -245,6 +247,7 @@ EcalRenderPlugin::initialise(int, char **)
   int const nPedestalSide(10);
   int const nPedestalCenter(10);
   int const nAccum(50);
+  int const nAccumMasked(14);
 
   tpTimingPalette.resize(nTPTim);
   tpTimingPalette[0] = kGray+2;
@@ -304,6 +307,15 @@ EcalRenderPlugin::initialise(int, char **)
     new TColor(iCol + i, r, g, b);
     accumPalette[i] = iCol + i;
   }
+
+  // For TTF4 vs Masking Status
+  accumMaskedPalette.resize(nAccumMasked);
+  for(int i(0); i < 11; i++){
+    accumMaskedPalette[i] = kWhite;
+  }
+  accumMaskedPalette[11] = kGray+1;
+  accumMaskedPalette[12] = kBlack;
+  accumMaskedPalette[13] = kBlue;
 
   iCol += nAccum;
 
@@ -1117,6 +1129,8 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
      !fullpath.Contains("Trigger Primitives") &&
      !fullpath.Contains("Occupancy") &&
      !fullpath.Contains("TestPulse") &&
+     !fullpath.Contains("Status Flags") &&
+     !fullpath.Contains("Masking Status") &&
      !fullpath.Contains("Cluster") &&
      !fullpath.Contains("channel status") &&
      !fullpath.Contains("energy Side")) return;
@@ -1160,7 +1174,7 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
   }
   else if(TPRegexp("E[BE]TimingTask/E[BE]TMT timing (map(| EE [+-])|E[BE][+-][0-1][0-9])").MatchB(fullpath)){
     if(isNewStyle)
-      obj->GetZaxis()->SetRangeUser(-25., 25.);
+      obj->GetZaxis()->SetRangeUser(-5., 5.);
     else
       obj->GetZaxis()->SetRangeUser(45., 55.);
     gStyle->SetPalette(timingPalette.size(), &(timingPalette[0]));
@@ -1207,6 +1221,19 @@ EcalRenderPlugin::preDrawByName(TCanvas* canvas, VisDQMObject const& dqmObject, 
     applyDefaults = false;
   }
 
+  if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Status Flags(| EE [+-])").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,5. );
+    obj->SetContour(5);
+    gStyle->SetPalette(1);
+  }
+  if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TT Masking Status(| EE [+-])").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,1. );
+    gStyle->SetPalette(1);
+  }
+  if( TPRegexp("E[BE]TriggerTowerTask/E[BE]TTT TTF4 vs Masking Status(| EE [+-])").MatchB(fullpath) ) {
+    if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
+    //renderInfo.drawOptions = "COLZ";
+    gStyle->SetPalette(accumMaskedPalette.size(), &(accumMaskedPalette[0]));
   if( TPRegexp("E[BE]IntegrityClient/E[BE]IT (|EE [+-] )channel status map").MatchB(fullpath) ) {
     if( obj->GetMaximum() > 0. ) obj->GetZaxis()->SetRangeUser( 0.,14. );
     obj->SetContour(14);
