@@ -10,11 +10,10 @@ deploy_reqmgr_deps()
       deploy $stage couchdb offsite
       deploy $stage wmcore ;;
     * )
-      deploy $stage couchdb
-      deploy $stage bigcouch ;;
+      deploy $stage couchdb ;;
   esac
-  deploy $stage reqmon
-  deploy $stage acdcserver
+  deploy $stage reqmon $variant
+  deploy $stage acdcserver $variant
 }
 
 deploy_reqmgr_prep()
@@ -72,7 +71,7 @@ deploy_reqmgr_post()
     * )
       # Tell couch to pick up reqmgr on the next restart
       local reqmgrapp=$root/current/apps/reqmgr
-      for couch in couchdb:5984 bigcouch:5985; do
+      for couch in couchdb:5984; do
         echo "couchapp push $reqmgrapp/data/couchapps/ReqMgr" \
              "http://localhost:${couch##*:}/reqmgr_workload_cache" \
           > $root/state/${couch%%:*}/stagingarea/reqmgr
@@ -85,7 +84,7 @@ deploy_reqmgr_post()
       (mkcrontab
        sysboot
        case $variant:$host in
-         prod:vocms0140 | preprod:vocms0131 | dev:vocms0127 | default:* )
+         prod:vocms0140 | preprod:vocms0131 | dev:vocms0127 | dev:vocms0126 | default:* )
            local cmd="$project_config/manage updateversions 'I did read documentation'"
            $nogroups || cmd="sudo -H -u _reqmgr bashs -l -c \"${cmd}\""
            echo "58 * * * * $cmd" ;;

@@ -27,7 +27,7 @@ HOSTADDR    = socket.getaddrinfo(HOST, None)[0][4][0]
 BASEDIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOSTALIAS   = HOST
 COLLHOST    = '127.0.0.1'
-COLLPORT    = DOMAIN == 'cms' and 9190 or 8061
+COLLPORT    = 9190
 #SERVICENAME = 'Online Development'
 SERVICENAME = 'ECAL DQM'
 #SERVERPORT  = 8070
@@ -98,12 +98,13 @@ server.serviceName = SERVICENAME
 server.plugin('render', "%s/style/*.cc" % CONFIGDIR)
 server.extend('DQMRenderLink', server.pathOfPlugin('render'))
 server.extend('DQMToJSON')
-server.extend('DQMFileAccess', None, UPLOADDIR,FILEREPO)
+server.extend('DQMFileAccess', "%s/auth/wmcore-auth/header-auth-key" % __file__.rsplit('/', 3)[0],
+              UPLOADDIR,FILEREPO)
 server.source('DQMUnknown')
 server.source('DQMOverlay')
 server.source('DQMStripChart')
 server.source('DQMLive', "%s:%s" % (COLLHOST,COLLPORT))
-server.source('DQMArchive', "%s/ix" % STATEDIR, '^/Global/')
+server.source('DQMArchive', "%s/ix128" % STATEDIR, '^/Global/')
 server.source('DQMLayout')
 
 execfile(CONFIGDIR + "/dqm-services.py")

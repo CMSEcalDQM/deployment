@@ -105,6 +105,7 @@ ui.index = 'reqmgr2' # this part must be activated, see below
 ui.reqmgr = data # this part contains uiuration for ReqMgr REST API, see above
 # This need to be removed when ReqMgr Client is removed
 ui.reqmgr.reqmgr2_url = "%s/reqmgr2" % BASE_URL # this part contains uiuration for ReqMgr REST API, see above
+ui.reqmgr.wmstats_url = "%s/wmstatsserver" % BASE_URL
 ui_main = ui.section_("main")
 ui_main.application = ui.index
 #ui_main.authz_defaults = {"role": None, "group": None, "site": None, "policy": "dangerously_insecure"}
@@ -134,15 +135,6 @@ if  HOST.startswith("vocms0307") or HOST.startswith("vocms0131"):
     couchCleanup.workqueue_url = "%s/%s" % (data.couch_host, data.couch_workqueue_db)
     couchCleanup.workqueueCleanDuration = 60 * 60 * 12 # every 12 hours
     couchCleanup.log_file = '%s/logs/reqmgr2/couchCleanup-%s.log' % (__file__.rsplit('/', 4)[0], time.strftime("%Y%m%d"))
-    
-    # LogDB task (update and clean up)
-    logDBTasks = extentions.section_("logDBTasks")
-    logDBTasks.object = "WMCore.ReqMgr.CherryPyThreads.LogDBTasks.LogDBTasks"
-    logDBTasks.central_logdb_url = data.central_logdb_url
-    logDBTasks.log_reporter = data.log_reporter
-    logDBTasks.logDBCleanDuration = 60 * 60 * 24 * 7 # 7 days
-    logDBTasks.logDBUpdateDuration = 60 * 10 # every 10 min
-    logDBTasks.log_file = '%s/logs/reqmgr2/logDBTasks-%s.log' % (__file__.rsplit('/', 4)[0], time.strftime("%Y%m%d"))
     
     # status change task 
     statusChangeTasks = extentions.section_("statusChangeTasks")
