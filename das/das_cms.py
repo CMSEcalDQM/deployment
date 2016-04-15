@@ -4,8 +4,9 @@ config = Configuration()
 
 # web_server configuration
 config.component_('web_server')
-config.web_server.thread_pool = 30
+config.web_server.thread_pool = 150
 config.web_server.socket_queue_size = 100
+config.web_server.timeout_monitor = True
 config.web_server.loglevel = 0
 config.web_server.host = '0.0.0.0'
 config.web_server.log_screen = True
@@ -94,7 +95,7 @@ config.das.error_expire = 300
 config.das.emptyset_expire = 5
 #config.das.thread_weights = ['phedex:5', 'dbs3:5']
 config.das.parserdir = '%s/state/das' % __file__.rsplit('/', 4)[0] # area owned by _das account
-config.das.services = ['dbs3','phedex','dashboard','monitor','runregistry','sitedb2','combined','conddb','reqmgr','mcm']
+config.das.services = ['dbs3','phedex','dashboard','monitor','runregistry','sitedb2','combined','conddb','reqmgr2','mcm']
 config.das.main_dbs = 'dbs3'
 
 # keyword search configuration

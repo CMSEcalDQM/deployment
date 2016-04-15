@@ -118,7 +118,7 @@ class SystemMonitor(Monitor):
     @param proc_name -- regex pattern to match process name
     @param activity -- list of activities to log.
     The allowed activities are:
-    cpu, mem, user, system, rss, vms, threads, connections, io, files"""
+    cpu, mem, swp, user, system, rss, vms, swap, threads, connections, io, files"""
 
     def safemsg(field, f):
       try:
@@ -130,42 +130,83 @@ class SystemMonitor(Monitor):
         pass
       return msg
 
+    def safefield(field, f):
+      try:
+        return f()
+      except Exception, e:
+        if can_talk:
+          logmsg(svc, "SYSTEM", "IGNORE", "failed to get %s field information: %s" % (field, str(e).replace("\n", "; ")))
+        pass
+        return 0
+
+    def addfield(dic, field, value):
+      try:
+        dic[field] += value
+      except:
+        dic[field] = value
+
+    def swap_info(proc):
+      f = open("/proc/" + str(proc.pid) + "/status")
+      match = re.search("VmSwap:\s+([0-9]+)\skB", f.read())
+      return int(match.group(1)) * 1024
+
+    def swap_percent(proc):
+      return swap_info(proc) * 100.0 / psutil.swap_memory().total
+
     if not psutil:
       return
-    for pid in psutil.get_pid_list():
-      proc = psutil.Process(pid)
-      if proc.username != svc:
+
+    data = {'processes': 0}
+    for proc in psutil.process_iter():
+      if proc.username() != svc:
         continue
-      cmd  = ' '.join(proc.cmdline)
+      cmd  = ' '.join(proc.cmdline())
       name = cmd.split('/')[-1]
       if proc_name and not re.search(proc_name, cmd):
         continue
-      msg  = 'PID: %s, NAME: %s, STATUS: %s' % (pid, name, proc.status)
-      mem_info = proc.get_memory_info()
-      cpu_info = proc.get_cpu_times()
+      mem_info = proc.memory_info()
+      cpu_info = proc.cpu_times()
+      data['processes'] += 1
       for field in activity:
         field = field.strip()
         if field == 'cpu':
-          msg += ', CPU: %3.1f%%' % proc.get_cpu_percent(interval=1.0)
+          addfield(data, field, proc.cpu_percent())
         elif field == 'mem':
-          msg += ', MEM: %3.1f%%' % proc.get_memory_percent()
+          addfield(data, field, proc.memory_percent())
+        elif field == 'swp':
+          addfield(data, field, swap_percent(proc))
         elif field == 'user':
-          msg += ', USER: %s' % cpu_info.user
+          addfield(data, field, cpu_info.user)
         elif field == 'system':
-          msg += ', SYSTEM: %s' % cpu_info.system
+          addfield(data, field, cpu_info.system)
         elif field == 'rss':
-          msg += ', RSS: %s' % mem_info.rss
+          addfield(data, field, mem_info.rss)
         elif field == 'vms':
-          msg += ', VMS: %s' % mem_info.vms
+          addfield(data, field, mem_info.vms)
+        elif field == 'swap':
+          addfield(data, field, swap_info(proc))
         elif field == 'threads':
-          msg += safemsg(field, proc.get_num_threads)
+          addfield(data, field, safefield('threads', proc.num_threads))
         elif field == 'connections':
-          msg += safemsg(field, proc.get_connections)
+          addfield(data, field, safefield('connections', proc.connections))
         elif field == 'io':
-          msg += safemsg(field, proc.get_io_counters)
+          addfield(data, field, safefield('io', proc.io_counters))
         elif field == 'files':
-          msg += safemsg(field, proc.get_open_files)
-      logmsg(svc, "SYSTEM", msg)
+          addfield(data, field, safefield('files', proc.open_files))
+
+    if data['processes'] < 1:
+      return
+    msg  = 'PROCESSES: %s' % str(data['processes'])
+    for field in activity:
+      field = field.strip()
+      if field in ['pid', 'name', 'status']:
+        continue
+      if field in ['cpu', 'mem', 'swp']:
+        msg += ', %s: %3.1f%%' % (field.upper(), data[field])
+      else:
+        msg += ', %s: %s' % (field.upper(), data[field])
+
+    logmsg(svc, "SYSTEM", msg)
 
 class ProcessMonitor(Monitor):
   """Monitor which looks for process command lines matching a regexp.
@@ -349,7 +390,7 @@ class LogMonitor(Monitor):
       else:
         next = file.read(1048576)
         linebuf = linebuf[pos:] + next
-        if linebuf == '': break
+        if next == '': break
         offset += pos
         pos = 0
 
